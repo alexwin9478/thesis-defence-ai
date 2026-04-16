@@ -11,7 +11,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 from utils import (
     ROOT, INPUT, get_client, ask_claude_long,
-    save_output, load_output
+    save_output, load_output,
+    load_claude_md, extract_thesis_title, CLAUDE_MD_FALLBACK,
 )
 
 SYSTEM = """You are simulating a panel of four PhD examination professors with
@@ -32,15 +33,8 @@ Be highly specific. Use exact numbers from the thesis where relevant."""
 
 PROMPT_TEMPLATE = """
 Generate exam questions for a PhD defence. TWO parts, 30 min each.
-Thesis: "Data-Driven Control for H2DF Engines" | Presentation: AutoML (171 slides)
 
-THESIS FACTS: GRU-DNN, >99k cycles, IMEP/NOx/PM/MPRR outputs; AutoML 27k HPC trials (TPE);
-NMPC via acados: +27.8% IMEP, -61.1% soot, -39.7% CO2, +105.1% NOx;
-BC: <2ms inference, ESP32/Raspberry Pi. Weak points: NOx trade-off, no Lyapunov proof,
-no convexity proof, BC safety, TRL prototype, GRU vs LSTM, generalization.
-
-AUTOML TOPICS: Grid/Random/BO-TPE; HPO/NAS/joint; 3 use-cases; MLOps; abstraction trap;
-Agentic AI vs AutoML.
+{thesis_context}
 
 Format per professor:
 ### Prof. [NAME]
@@ -48,6 +42,28 @@ Format per professor:
 
 Generate 7 questions per professor (28 total) + 6 cross-topic synthesis questions.
 """
+
+
+def _build_prompt() -> str:
+    """Build the question generation prompt using CLAUDE.md and prior analysis outputs."""
+    claude_text = load_claude_md()
+    thesis_title = extract_thesis_title(claude_text)
+
+    thesis_analysis = load_output("thesis_analysis.md", "summaries")
+    automl_analysis = load_output("automl_analysis.md", "summaries")
+
+    context_parts = [f'Thesis: "{thesis_title}"']
+    if thesis_analysis:
+        context_parts.append(f"THESIS ANALYSIS (use for specific facts and numbers):\n{thesis_analysis[:2500]}")
+    elif claude_text:
+        context_parts.append(f"THESIS CONTEXT (from CLAUDE.md):\n{claude_text[:2500]}")
+    else:
+        context_parts.append(f"THESIS CONTEXT: {CLAUDE_MD_FALLBACK}")
+
+    if automl_analysis:
+        context_parts.append(f"AUTOML PRESENTATION CONTEXT:\n{automl_analysis[:1500]}")
+
+    return PROMPT_TEMPLATE.format(thesis_context="\n\n".join(context_parts))
 
 
 def run(force: bool = False) -> str:
@@ -61,7 +77,7 @@ def run(force: bool = False) -> str:
     result = ask_claude_long(
         client,
         system=SYSTEM,
-        user=PROMPT_TEMPLATE,
+        user=_build_prompt(),
         max_tokens=6000,
     )
 

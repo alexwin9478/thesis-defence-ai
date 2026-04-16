@@ -76,7 +76,7 @@ DNN-MPC vs GP-MPC; what BC cannot guarantee; why BC for deployment.
 ## Cat 8: Key Comparisons (15 cards)
 GRU vs LSTM vs Transformer; DNN-MPC vs GP-MPC; AutoML vs manual tuning;
 Grid vs Random vs BO; MPC vs BC (cost, safety, deployment); TPE vs GP-BO;
-H2 vs diesel combustion characteristics; Willems vs Andert critique angles.
+H2 vs diesel combustion characteristics; Examiner 1 vs Examiner 2 critique angles (from your examiners.md).
 """
 
 

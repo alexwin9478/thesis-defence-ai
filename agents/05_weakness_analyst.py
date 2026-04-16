@@ -13,7 +13,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 from utils import (
     ROOT, INPUT, get_client, ask_claude_long,
-    save_output, load_output
+    save_output, load_output,
+    load_claude_md, extract_thesis_title, CLAUDE_MD_FALLBACK,
 )
 
 SYSTEM = """You are a rigorous academic reviewer who specializes in identifying
@@ -25,20 +26,12 @@ methodological weaknesses in PhD theses. Your role is to:
 5. Suggest literature the candidate MUST know to defend against attacks
 Be honest and thorough — the candidate needs to know the real weaknesses."""
 
-WEAKNESS_PROMPT = """
+WEAKNESS_PROMPT_TEMPLATE = """
 Perform a deep critical analysis of this PhD thesis:
-"A Data-Driven Control Development Workflow for Hydrogen-Diesel Dual-Fuel Engines"
+"{thesis_title}"
 
 THESIS CONTRIBUTIONS:
-1. GRU-DNN trained on >99,000 H2DF engine cycles (predicts IMEP, NOx, PM, MPRR)
-2. AutoML with 27,000 parallelized BO-TPE trials on HPC for architecture optimization
-3. Nonlinear MPC using acados with DNN as learned dynamics:
-   - IMEP: +27.8% vs baseline diesel controller
-   - Soot: -61.1%
-   - CO2 potential: -39.7%
-   - NOx: +105.1% (significant increase)
-4. Behavior Cloning (BC): replicates MPC, <2ms inference, deployed on ESP32/Raspberry Pi
-5. End-to-end toolchain (data acquisition to test bench) in under 1 day
+{thesis_contributions}
 
 PROVIDE:
 
@@ -53,18 +46,18 @@ For each weakness:
 > [How candidate should respond]
 **Supporting Literature:** [Key papers/methods the candidate should cite]
 
-Focus areas:
+Focus areas (adapt to the specific thesis domain):
 - Absence of stability/safety guarantees (Lyapunov, ISS, etc.)
-- NOx increase — regulatory implications
-- No comparison to GP-MPC, koopman operator MPC, other DNN-MPC approaches
-- Generalization beyond training envelope
+- Performance trade-offs with regulatory or safety implications
+- Missing baseline comparisons to state-of-the-art alternatives
+- Generalization beyond the training or experimental envelope
 - Data representativeness and distribution shift
-- BC safety: no formal guarantees when MPC and BC diverge
-- AutoML 27k trials — computational cost justification
-- GRU vs modern alternatives (Transformer, S4, Mamba)
-- No uncertainty quantification in DNN predictions
+- Deployed controller safety when it diverges from the reference controller
+- Computational cost justification for training/optimization runs
+- Choice of model architecture vs modern alternatives
+- Absence of uncertainty quantification
 - Limited operating range tested
-- Soft constraints — what happens when violated?
+- Constraint handling: what happens when soft constraints are violated?
 
 ## Literature Gaps
 
@@ -75,12 +68,7 @@ List papers the candidate MUST read before the defence:
 
 ## Comparison to State of Art
 
-How does this thesis compare to:
-1. GP-MPC approaches (Hewing et al., Berkenkamp et al.)
-2. Koopman operator MPC
-3. PINN-MPC
-4. Other DNN-MPC approaches
-5. Standard behavior cloning for control systems
+How does this thesis compare to established alternative approaches in its domain?
 """
 
 AUTOML_WEAKNESS_PROMPT = """
@@ -121,8 +109,33 @@ For each: one-line summary and why it may come up.
 """
 
 
+def _build_weakness_prompt() -> str:
+    """Build the weakness analysis prompt using CLAUDE.md and prior outputs."""
+    claude_text = load_claude_md()
+    thesis_title = extract_thesis_title(claude_text)
+
+    thesis_analysis = load_output("thesis_analysis.md", "summaries")
+    if thesis_analysis:
+        contributions = (
+            "Derived from the thesis analysis below. Use specific numbers and claims as found:\n\n"
+            + thesis_analysis[:3000]
+        )
+    elif claude_text:
+        contributions = (
+            "Derived from the candidate's CLAUDE.md context below:\n\n"
+            + claude_text[:3000]
+        )
+    else:
+        contributions = CLAUDE_MD_FALLBACK
+    return WEAKNESS_PROMPT_TEMPLATE.format(
+        thesis_title=thesis_title,
+        thesis_contributions=contributions,
+    )
+
+
 def run(force: bool = False) -> None:
     client = get_client()
+    weakness_prompt = _build_weakness_prompt()
 
     existing_weakness = load_output("weakness_report.md", "weak_points")
     if existing_weakness and not force:
@@ -130,7 +143,7 @@ def run(force: bool = False) -> None:
     else:
         print("  Analyzing thesis weaknesses...")
         weakness = ask_claude_long(
-            client, system=SYSTEM, user=WEAKNESS_PROMPT, max_tokens=16000
+            client, system=SYSTEM, user=weakness_prompt, max_tokens=16000
         )
         save_output("weakness_report.md", weakness, "weak_points")
 
@@ -150,7 +163,7 @@ def run(force: bool = False) -> None:
     else:
         print("  Generating literature gap analysis...")
         lit_prompt = (
-            WEAKNESS_PROMPT
+            weakness_prompt
             + "\n\nFocus ONLY on the Literature Gaps and Comparison to State of Art sections."
         )
         lit = ask_claude_long(client, system=SYSTEM, user=lit_prompt, max_tokens=8000)

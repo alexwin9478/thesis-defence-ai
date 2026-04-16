@@ -11,7 +11,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
 from utils import (
     ROOT, INPUT, get_client, extract_pdf_text,
-    ask_claude_long, save_output, load_output
+    ask_claude_long, save_output, load_output,
+    load_claude_md, extract_thesis_title, CLAUDE_MD_FALLBACK,
 )
 
 def _find_thesis_pdf() -> Path:
@@ -35,7 +36,7 @@ Be precise, technical, and structured. Use Markdown with clear headings."""
 
 PROMPT_TEMPLATE = """
 Analyze this PhD thesis excerpt. The thesis is titled:
-"A Data-Driven Control Development Workflow for Hydrogen-Diesel Dual-Fuel Engines"
+"{thesis_title}"
 
 For EACH chapter, provide:
 1. **Core Claim / Contribution**: What does this chapter contribute?
@@ -45,14 +46,7 @@ For EACH chapter, provide:
 5. **Limitations**: What does NOT work, what is NOT shown?
 6. **Potential Attack Vectors**: What would a critical examiner challenge here?
 
-Chapter structure from the thesis:
-- Introduction (11)
-- Fundamentals (12)
-- Experimental Setup (13)
-- Deep Neural Network (14): GRU-based DNN, >99k H2DF cycles, AutoML with 27k trials
-- Model Predictive Control (15): acados, nonlinear MPC with DNN dynamics, 27.8% IMEP improvement
-- Behavior Cloning (16): mimics MPC, <2ms inference, ESP32/Raspberry Pi deployment
-- Conclusion (17)
+Identify and analyze every chapter you find in the thesis text below.
 
 THESIS TEXT:
 {text}
@@ -80,12 +74,15 @@ def run(force: bool = False) -> str:
     # in the first ~150 pages which fall within this window.
     text = extract_pdf_text(pdf_path, max_chars=150_000)
 
+    claude_text = load_claude_md()
+    thesis_title = extract_thesis_title(claude_text)
+
     print("  Calling Claude (thesis analysis — allow 10+ min via CLI)...")
     client = get_client()
     result = ask_claude_long(
         client,
         system=SYSTEM,
-        user=PROMPT_TEMPLATE.format(text=text[:150_000]),
+        user=PROMPT_TEMPLATE.format(thesis_title=thesis_title, text=text[:150_000]),
         max_tokens=16000,
     )
 
