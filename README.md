@@ -21,6 +21,12 @@ Powered by [Claude](https://claude.ai) (Anthropic). Works with a Claude.ai subsc
 > study, knowledge of your own work, or genuine understanding of the research.
 > Use it to identify gaps, practise answers, and stress-test your arguments.
 > **The final defence is yours.**
+>
+> **This repository was developed using agentic AI (Claude Code).** No guarantees are
+> made for formal correctness of generated content, code logic, or cited literature.
+> All outputs should be critically reviewed before use. **Usage is at your own risk.**
+>
+> Improvements, corrections, and feedback are very welcome — open a PR or issue!
 
 ---
 
