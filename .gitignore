@@ -1,0 +1,32 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Input files (thesis PDF etc. — large files, add manually after cloning)
+input/thesis/
+input/presentation/
+
+# Personal notes — not for public repo (PPTX, PDF, personal .md files)
+# Exception: .example.md templates are tracked so new users can copy them
+input/notes/*
+!input/notes/*.example.md
+
+# Generated outputs — personal research content; not published
+# Keep .obsidian config so the vault opens correctly for anyone who clones
+output/**
+!output/
+!output/.obsidian/
+!output/.obsidian/**
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+.claude/
+/squash - Kopie.bat

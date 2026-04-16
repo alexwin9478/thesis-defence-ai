@@ -1,0 +1,36 @@
+{
+  "flashcardsInSubfolders": true,
+  "flashcardTags": [
+    "flashcards"
+  ],
+  "convertFoldersToDecks": false,
+  "cardCommentOnSameLine": false,
+  "burySiblingCards": false,
+  "showContextInCards": true,
+  "flashcardEasyText": "Easy",
+  "flashcardGoodText": "Good",
+  "flashcardHardText": "Hard",
+  "flashcardNextText": "Next",
+  "singleLineCardSeparator": "::",
+  "singleLineReversedCardSeparator": ":::",
+  "multilineCardSeparator": "?",
+  "multilineReversedCardSeparator": "??",
+  "convertHighlightsToCloze": true,
+  "tagsToReview": [
+    "#review"
+  ],
+  "noteFoldersToIgnore": [
+    "study_plan",
+    "weak_points",
+    "literature_gaps"
+  ],
+  "openRandomNote": false,
+  "autoNextNote": false,
+  "disableFileMenuReviewOptions": false,
+  "maxNDaysNotesReviewQueue": 365,
+  "baseEase": 250,
+  "lapsesIntervalChange": 0.5,
+  "easyBonus": 1.3,
+  "maximumInterval": 36525,
+  "maxLinkFactor": 1.0
+}
