@@ -42,7 +42,7 @@ AGENT_MAP = {
     "flashcard_maker":      ("06_flashcard_maker",      "Flashcard Maker",         "Creates 100+ Q&A flashcards"),
     "study_planner":        ("07_study_planner",        "Study Planner",           "Generates 7-day daily schedule"),
     "deep_researcher":      ("08_deep_researcher",      "Deep Researcher",         "Deep-dives into specific weak topic areas"),
-    "professor_griller":    ("09_professor_griller",    "Professor Griller",       "Simulates real examiners: Willems (TU/e) + Andert (RWTH)"),
+    "professor_griller":    ("09_professor_griller",    "Professor Griller",       "Simulates real examiners from input/notes/examiners.md"),
     "thesis_summary":       ("10_thesis_summary",       "Thesis Summary",          "Tiered spoken summaries: 1/3/5-sentence + 1/3/5-min"),
     "committee_qa":         ("11_committee_qa",         "Committee Q&A",           "Polished answers to known committee questions from candidate notes"),
     "deep_technical_qa":    ("12_deep_technical_qa",    "Deep Technical Q&A",      "Research-backed answers: MPC design, engine, DNN modelling, AutoML"),
@@ -185,10 +185,10 @@ def print_output_summary():
             "[bold green]All outputs generated![/bold green]\n\n"
             "Next step — open your Obsidian study vault:\n"
             "  1. Launch Obsidian\n"
-            "  2. Open folder as vault: [cyan]C:\\Git\\phd-defence-prep\\output[/cyan]\n"
+            "  2. Open folder as vault: [cyan]output/[/cyan] (inside this repo)\n"
             "  3. Click 'Trust author and enable plugins'\n"
             "  4. Open [cyan]summaries/flashcards.md[/cyan] -> card icon -> Review Flashcards\n\n"
-            "105 flashcards ready. Start with [cyan]questions_answers/professor_griller.md[/cyan].",
+            "Flashcards ready. Start with [cyan]questions_answers/professor_griller.md[/cyan].",
             title="Study Time",
             style="green"
         ))

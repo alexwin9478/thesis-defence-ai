@@ -23,7 +23,7 @@ SYSTEM = """You are a research expert with deep knowledge of:
 - Deep learning: RNNs, GRUs, LSTMs, Transformers
 
 Provide thorough, accurate, and citable responses. Always contextualize
-relative to the thesis work on H2DF engine control."""
+relative to the candidate's thesis domain and research contributions."""
 
 TOPIC_PROMPTS = {
     "gp_mpc": """
@@ -67,7 +67,7 @@ Provide:
 
     "nox_mitigation": """
 Research: NOx Mitigation Strategies for H2DF Engines
-Context: The thesis shows 105.1% NOx increase — must defend this trade-off.
+Context: The thesis shows a significant NOx increase from hydrogen substitution -- must defend this trade-off.
 
 Provide:
 1. Why does H2 increase NOx? (lean/premixed flame temperature)
@@ -78,7 +78,7 @@ Provide:
    - SCR (Selective Catalytic Reduction)
    - Injection timing retard
 3. Euro VII implications for H2DF NOx
-4. How to frame: "105% increase is acknowledged, here's the mitigation roadmap"
+4. How to frame: "NOx increase is acknowledged, here's the mitigation roadmap"
 5. Regulatory context: why short-term NOx increase can still be justified
 """,
 
@@ -123,7 +123,7 @@ Provide a structured comparison table and discussion of:
 6. Tube-based robust MPC with learned uncertainty
 
 For each: computational complexity, data requirements, safety guarantees,
-scalability, and suitability for H2DF engine control.
+scalability, and suitability for the candidate's thesis domain.
 """,
 }
 

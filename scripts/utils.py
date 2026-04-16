@@ -210,6 +210,47 @@ def slides_to_text(slides: list[dict], include_notes: bool = True) -> str:
 
 
 # ---------------------------------------------------------------------------
+# CLAUDE.md helpers — used by agents to read user-supplied thesis context
+# ---------------------------------------------------------------------------
+
+def load_claude_md() -> str:
+    """Return the full UTF-8 content of CLAUDE.md, or an empty string if not found."""
+    claude_md = ROOT / "CLAUDE.md"
+    if claude_md.exists():
+        return claude_md.read_text(encoding="utf-8")
+    return ""
+
+
+def extract_thesis_title(claude_text: str) -> str:
+    """Extract the thesis title from CLAUDE.md content."""
+    for line in claude_text.splitlines():
+        if "**Thesis:**" in line:
+            title = line.replace("**Thesis:**", "").strip().strip("*").strip('"').strip("'")
+            # Skip unfilled placeholder values (they contain square brackets)
+            if title and "[" not in title:
+                return title
+    return "[Thesis title — fill in CLAUDE.md]"
+
+
+def extract_defence_date(claude_text: str) -> str:
+    """Extract the defence date from CLAUDE.md content."""
+    for line in claude_text.splitlines():
+        if "**Defence Date:**" in line:
+            date = line.replace("**Defence Date:**", "").strip()
+            # Skip unfilled placeholder values (they contain square brackets)
+            if date and "[" not in date:
+                return date
+    return "[Defence date — fill in CLAUDE.md]"
+
+
+# Fallback message used by agents when CLAUDE.md is not populated yet.
+CLAUDE_MD_FALLBACK = (
+    "Fill in CLAUDE.md with your thesis title, key numbers, and contributions, "
+    "then run thesis_analyst for richer, more targeted output."
+)
+
+
+# ---------------------------------------------------------------------------
 # File I/O
 # ---------------------------------------------------------------------------
 
